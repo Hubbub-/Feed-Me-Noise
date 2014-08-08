@@ -5,7 +5,9 @@ Minim minim;
 AudioInput in;
 FFT fft;
 
-boolean sketchFullScreen(){ return true; }
+boolean sketchFullScreen() { 
+  return true;
+}
 
 
 ArrayList <Square> squares; 
@@ -16,149 +18,182 @@ String fShapee, xShapee;
 String direction;
 int colour;
 int fSpeed, xSpeed;
+float boxProb, sphereProb, ellipseProb, rectProb;
 
 boolean forwarding, sidewaysing;
 boolean fPress, xPress;
 
-void setup(){
- size(displayWidth, displayHeight, P3D);
+void setup() {
+  size(displayWidth, displayHeight, P3D);
   noCursor(); 
- 
- fShapee = "box";
- xShapee = "box"; 
- direction = "right";
- colour = 0;
- fSpeed = 1;
- xSpeed = 1;
-  
+
+  fShapee = "box";
+  xShapee = "box"; 
+  direction = "right";
+  colour = 0;
+  fSpeed = 5;
+  xSpeed = 8;
+  forwarding = true;
+  sidewaysing = true;
+  boxProb = 0.2;  
+  sphereProb = 0.1; 
+  ellipseProb = 0.3; 
+  rectProb = 0.4;
+
+
   //initialise the minim object
   minim = new Minim (this);
   in = minim.getLineIn(Minim.STEREO, 512);
 
   //initialise the FFT object
   fft = new FFT(in.bufferSize(), in.sampleRate());
-  
+
   squares = new ArrayList <Square> (); //initialise square list
   circles = new ArrayList <Circle> (); //initialise circle list
   forwards = new ArrayList <Forward> (); //forward flying objects
   sidewayses = new ArrayList <Sideways> ();
-  
 }
 
-void draw(){
+void draw() {
   background(0);
   //println("fShape=" + fShapee +" speed="+speed+" forward(f)="+forwarding);
-  
+
   fft.forward(in.mix);
-  
+
   colour ++;
-  if (colour > 100){
+  if (colour > 100) {
     colour = 0;
   }
-  
-  float vol=(fft.calcAvg(20,5000))*50;
-  if (vol>50 && forwarding){
+//  xShapee = fShapee;
+
+  float vol=(fft.calcAvg(20, 5000))*50;
+  if (vol>100 && forwarding) {
+    changeFshapee();
     //                Forward(int xIn,               int yIn,           int zIn, int speedIn, float colourIn, String shapIn){
-    forwards.add (new Forward(int(random(0,width)), int(random(0,height)), -500, fSpeed, colour+random(0,50), fShapee));
+    forwards.add (new Forward(int(random(0, width)), int(random(0, height)), -500, fSpeed, colour+random(0, 50), fShapee));
   }
-  
-    if (vol>50 && sidewaysing){
-      if (direction == "right"){
-        sidewayses.add (new Sideways(-500, int(random(0,height)), xSpeed, colour+random(0,50), xShapee));
-      }
-    if (direction == "left"){
-        sidewayses.add (new Sideways(int(width*1.3), int(random(0,height)), xSpeed, colour+random(0,50), xShapee));
-      }
-    if (direction == "down"){
-        sidewayses.add (new Sideways(int(random(0,width)), -500, xSpeed, colour+random(0,50), xShapee));
-      }
-    if (direction == "up"){
-        sidewayses.add (new Sideways(int(random(0,width)), int(height*1.3), xSpeed, colour+random(0,50), xShapee));
-      }
-   
+
+  if (vol>50 && sidewaysing) {
+    changeXshapee();
+    if (direction == "right") {
+      sidewayses.add (new Sideways(-500, int(random(0, height)), xSpeed, colour+random(0, 50), xShapee));
+    }
+    if (direction == "left") {
+      sidewayses.add (new Sideways(int(width*1.3), int(random(0, height)), xSpeed, colour+random(0, 50), xShapee));
+    }
+    if (direction == "down") {
+      sidewayses.add (new Sideways(int(random(0, width)), -500, xSpeed, colour+random(0, 50), xShapee));
+    }
+    if (direction == "up") {
+      sidewayses.add (new Sideways(int(random(0, width)), int(height*1.3), xSpeed, colour+random(0, 50), xShapee));
+    }
   }
-  
-  for (int i = forwards.size()-1; i > 0; i--) {
+
+  for (int i = forwards.size ()-1; i > 0; i--) {
     Forward myForward = (Forward) forwards.get(i);
-  
+
     myForward.update();
     myForward.render();
-    
-    if (myForward.dead){
+
+    if (myForward.dead) {
       forwards.remove(i);
     }
-    
   }
-  
-  for (int i = sidewayses.size()-1; i > 0; i--) {
+
+  for (int i = sidewayses.size ()-1; i > 0; i--) {
     Sideways mySideways = (Sideways) sidewayses.get(i);
-  
+
     mySideways.update();
     mySideways.render();
-    
-    if (mySideways.dead){
+
+    if (mySideways.dead) {
       sidewayses.remove(i);
     }
-    
   }
-  
-  
-//  if (shapee == "rect"){
-//    squares();
-//  }
-//    if (mode == 2){
-//    circles();
-//  }
-  
-  
+
+
+  //  if (shapee == "rect"){
+  //    squares();
+  //  }
+  //    if (mode == 2){
+  //    circles();
+  //  }
 }
 
 
 
-void squares(){
-  float vol=(fft.calcAvg(500,5000))*50;
-  if (vol>50){
+void squares() {
+  float vol=(fft.calcAvg(500, 5000))*50;
+  if (vol>50) {
     // add a square x,y,colour
-    squares.add (new Square(int(random(0,width)), int(random(0,height)), random(0,100)));
+    squares.add (new Square(int(random(0, width)), int(random(0, height)), random(0, 100)));
   }
-  
-  for (int i = 0; i < squares.size(); i++) {
+
+  for (int i = 0; i < squares.size (); i++) {
     Square mySquare = (Square) squares.get(i);
-  
+
     mySquare.update();
     mySquare.render();
-    
   }
 }
 
-void circles(){
-  float vol=(fft.calcAvg(500,5000))*50;
-  if (vol>50){
+void circles() {
+  float vol=(fft.calcAvg(500, 5000))*50;
+  if (vol>50) {
     // add a square x,y,colour
-    circles.add (new Circle(int(random(0,width)), int(random(0,height)), random(0,100)));
+    circles.add (new Circle(int(random(0, width)), int(random(0, height)), random(0, 100)));
   }
-  
-  for (int i = 0; i < circles.size(); i++) {
+
+  for (int i = 0; i < circles.size (); i++) {
     Circle myCircle = (Circle) circles.get(i);
-  
+
     myCircle.update();
     myCircle.render();
-    
+  }
+}
+
+void changeFshapee() {
+  float i = random(0, 1);
+  if (i <= boxProb) {
+    fShapee = "box";
+  }
+  if (i > boxProb && i <= boxProb + sphereProb) {
+    fShapee = "sphere";
+  }
+  if (i > boxProb + sphereProb && i <= boxProb + sphereProb + ellipseProb) {
+    fShapee = "ellipse";
+  }
+  if (i > boxProb + sphereProb + ellipseProb && i <= boxProb + sphereProb + ellipseProb + rectProb) {
+    fShapee = "rect";
+  }
+}
+
+void changeXshapee() {
+  float i = random(0, 1);
+  if (i <= boxProb) {
+    xShapee = "box";
+  }
+  if (i > boxProb && i <= boxProb + sphereProb) {
+    xShapee = "sphere";
+  }
+  if (i > boxProb + sphereProb && i <= boxProb + sphereProb + ellipseProb) {
+    xShapee = "ellipse";
+  }
+  if (i > boxProb + sphereProb + ellipseProb && i <= boxProb + sphereProb + ellipseProb + rectProb) {
+    xShapee = "rect";
   }
 }
 
 
-
-
-void keyPressed(){
+void keyPressed() {
   if (key == 'f') {
     fPress = true;
   }
   if (key == 'x') {
     xPress = true;
   }
-  
-  if (fPress){
+
+  if (fPress) {
     if (key == 'o') {
       forwarding = !forwarding;
     }
@@ -205,10 +240,10 @@ void keyPressed(){
       fSpeed = 9;
     }
   }
-  
-  
-  
-  if (xPress){
+
+
+
+  if (xPress) {
     if (key == 'o') {
       sidewaysing = !sidewaysing;
     }
@@ -266,16 +301,15 @@ void keyPressed(){
     if (keyCode == 40) {
       direction = "down";
     }
-        
   }
-   
 }
 
-void keyReleased(){
-  if (key == 'f'){
+void keyReleased() {
+  if (key == 'f') {
     fPress = false;
   }
-  if (key == 'x'){
+  if (key == 'x') {
     xPress = false;
   }
 }
+

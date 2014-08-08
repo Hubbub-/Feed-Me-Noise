@@ -10,7 +10,7 @@ class Sideways{
   Sideways(int xIn, int yIn, int speedIn,  float colourIn, String shapIn){
     xPos = xIn;
     yPos = yIn;
-    zPos = -50;
+    zPos = int(random(-500, 3000));
     colour = colourIn;
     shap = shapIn; 
     dead = false;
